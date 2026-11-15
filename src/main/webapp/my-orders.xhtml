@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">My Orders - Campus Canteen</ui:define>
+
+    <ui:define name="content">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <h2 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-clock-history text-danger me-2"></i>My Food Orders
+                </h2>
+                <p class="text-muted small mb-0">Track live food preparation progress and view your past canteen tokens.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <h:form styleClass="d-inline">
+                    <h:commandButton value="Refresh Status"
+                                     action="#{studentOrderBean.refreshOrders}"
+                                     styleClass="btn btn-outline-primary btn-sm me-2">
+                        <f:ajax render=":ordersForm"/>
+                    </h:commandButton>
+                </h:form>
+                <h:link outcome="/menu.xhtml" styleClass="btn btn-canteen btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>New Order
+                </h:link>
+            </div>
+        </div>
+
+        <h:form id="ordersForm">
+            <h:panelGroup rendered="#{empty studentOrderBean.studentOrders}">
+                <div class="card canteen-card text-center py-5">
+                    <div class="card-body">
+                        <i class="bi bi-receipt text-muted display-4"></i>
+                        <h4 class="mt-3 text-secondary fw-bold">No Orders Placed Yet</h4>
+                        <p class="text-muted">You haven't made any food pre-orders today.</p>
+                        <h:link outcome="/menu.xhtml" styleClass="btn btn-canteen mt-2">
+                            Browse Canteen Menu
+                        </h:link>
+                    </div>
+                </div>
+            </h:panelGroup>
+
+            <div class="row g-4">
+                <ui:repeat value="#{studentOrderBean.studentOrders}" var="order">
+                    <div class="col-12">
+                        <div class="card canteen-card shadow-sm p-4">
+                            <!-- Order Header -->
+                            <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-3 gap-2">
+                                <div>
+                                    <span class="badge bg-danger fs-6 mb-1">#{order.orderNumber}</span>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-calendar3 me-1"></i>Ordered on: #{order.orderTime}
+                                    </div>
+                                </div>
+                                <div class="text-md-end">
+                                    <span class="badge-stall fs-6 me-2">
+                                        <i class="bi bi-geo-alt me-1"></i>#{order.counterNumber} - #{order.vendorName}
+                                    </span>
+                                    <!-- Status Badge -->
+                                    <span class="badge #{order.status == 'PLACED' ? 'badge-status-placed' : (order.status == 'PREPARING' ? 'badge-status-preparing' : (order.status == 'READY' ? 'badge-status-ready' : (order.status == 'COLLECTED' ? 'badge-status-collected' : 'badge-status-cancelled')))} px-3 py-2 fs-6">
+                                        #{order.status}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Visual Step Progress Tracker (Shown for non-cancelled orders) -->
+                            <h:panelGroup rendered="#{order.status != 'CANCELLED'}">
+                                <div class="stepper-wrapper my-4">
+                                    <!-- Step 1: Placed -->
+                                    <div class="stepper-item #{studentOrderBean.getStatusStep(order.status) >= 1 ? (studentOrderBean.getStatusStep(order.status) > 1 ? 'completed' : 'active') : ''}">
+                                        <div class="step-counter"><i class="bi bi-file-earmark-check"></i></div>
+                                        <div class="step-name">Order Placed</div>
+                                    </div>
+
+                                    <!-- Step 2: Preparing -->
+                                    <div class="stepper-item #{studentOrderBean.getStatusStep(order.status) >= 2 ? (studentOrderBean.getStatusStep(order.status) > 2 ? 'completed' : 'active') : ''}">
+                                        <div class="step-counter"><i class="bi bi-fire"></i></div>
+                                        <div class="step-name">Kitchen Preparing</div>
+                                    </div>
+
+                                    <!-- Step 3: Ready -->
+                                    <div class="stepper-item #{studentOrderBean.getStatusStep(order.status) >= 3 ? (studentOrderBean.getStatusStep(order.status) > 3 ? 'completed' : 'active') : ''}">
+                                        <div class="step-counter"><i class="bi bi-bell-fill"></i></div>
+                                        <div class="step-name">Ready for Pickup</div>
+                                    </div>
+
+                                    <!-- Step 4: Collected -->
+                                    <div class="stepper-item #{studentOrderBean.getStatusStep(order.status) >= 4 ? 'completed' : ''}">
+                                        <div class="step-counter"><i class="bi bi-check-lg"></i></div>
+                                        <div class="step-name">Collected</div>
+                                    </div>
+                                </div>
+
+                                <!-- Pickup Alert if ready -->
+                                <h:panelGroup rendered="#{order.status == 'READY'}">
+                                    <div class="alert alert-success d-flex align-items-center rounded-3 p-3 mb-3">
+                                        <i class="bi bi-check-circle-fill fs-3 text-success me-3"></i>
+                                        <div>
+                                            <strong class="fs-6">Your Food is Ready for Pickup!</strong>
+                                            <div class="small">Please proceed to <strong>#{order.counterNumber} (#{order.vendorName})</strong> with Token <strong>#{order.orderNumber}</strong>.</div>
+                                        </div>
+                                    </div>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <!-- Cancelled Notice -->
+                            <h:panelGroup rendered="#{order.status == 'CANCELLED'}">
+                                <div class="alert alert-danger py-2 small mb-3">
+                                    <i class="bi bi-x-circle me-1"></i>This order was cancelled.
+                                </div>
+                            </h:panelGroup>
+
+                            <!-- Items Summary & Total -->
+                            <div class="bg-light p-3 rounded-3">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless align-middle mb-0">
+                                        <thead>
+                                            <tr class="text-muted small border-bottom">
+                                                <th>Item</th>
+                                                <th class="text-center">Qty</th>
+                                                <th class="text-end">Price</th>
+                                                <th class="text-end">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ui:repeat value="#{order.items}" var="it">
+                                                <tr>
+                                                    <td class="fw-semibold">#{it.itemName}</td>
+                                                    <td class="text-center">x#{it.quantity}</td>
+                                                    <td class="text-end text-muted">&#8377; #{it.unitPrice}</td>
+                                                    <td class="text-end fw-bold text-dark">&#8377; #{it.subtotal}</td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="border-top">
+                                                <td colspan="3" class="fw-bold text-end">Total Amount:</td>
+                                                <td class="fw-bold text-end text-success fs-6">&#8377; #{order.totalAmount}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Cancel Order Button (Only allowed when Placed) -->
+                            <h:panelGroup rendered="#{order.cancellable}">
+                                <div class="mt-3 text-end">
+                                    <h:commandButton value="Cancel This Order"
+                                                     action="#{studentOrderBean.cancelOrder(order.id)}"
+                                                     onclick="return confirm('Are you sure you want to cancel this order?');"
+                                                     styleClass="btn btn-outline-danger btn-sm">
+                                        <f:ajax render=":ordersForm"/>
+                                    </h:commandButton>
+                                </div>
+                            </h:panelGroup>
+                        </div>
+                    </div>
+                </ui:repeat>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

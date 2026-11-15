@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<ui:composition>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-canteen sticky-top">
+        <div class="container">
+            <h:link outcome="/index.xhtml" styleClass="navbar-brand d-flex align-items-center">
+                <i class="bi bi-shop me-2 text-warning fs-4"></i>
+                <span>Campus</span>Canteen
+            </h:link>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#canteenNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="canteenNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <h:link outcome="/index.xhtml" styleClass="nav-link">
+                            <i class="bi bi-house-door me-1"></i>Home
+                        </h:link>
+                    </li>
+                    <li class="nav-item">
+                        <h:link outcome="/menu.xhtml" styleClass="nav-link">
+                            <i class="bi bi-grid me-1"></i>Canteen Menu
+                        </h:link>
+                    </li>
+                    <h:panelGroup rendered="#{authBean.student}">
+                        <li class="nav-item">
+                            <h:link outcome="/my-orders.xhtml" styleClass="nav-link">
+                                <i class="bi bi-clock-history me-1"></i>My Orders
+                            </h:link>
+                        </li>
+                    </h:panelGroup>
+
+                    <!-- Vendor Specific Links -->
+                    <h:panelGroup rendered="#{authBean.vendor}">
+                        <li class="nav-item">
+                            <h:link outcome="/vendor/orders.xhtml" styleClass="nav-link text-warning fw-semibold">
+                                <i class="bi bi-receipt me-1"></i>Live Orders
+                            </h:link>
+                        </li>
+                        <li class="nav-item">
+                            <h:link outcome="/vendor/menu-management.xhtml" styleClass="nav-link text-warning">
+                                <i class="bi bi-card-checklist me-1"></i>Manage Menu
+                            </h:link>
+                        </li>
+                    </h:panelGroup>
+
+                    <!-- Admin Link -->
+                    <h:panelGroup rendered="#{authBean.admin}">
+                        <li class="nav-item">
+                            <h:link outcome="/admin/dashboard.xhtml" styleClass="nav-link text-info fw-semibold">
+                                <i class="bi bi-speedometer2 me-1"></i>Admin Dashboard
+                            </h:link>
+                        </li>
+                    </h:panelGroup>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Cart Pill -->
+                    <h:link outcome="/cart.xhtml" styleClass="btn btn-outline-light position-relative rounded-pill px-3 py-1">
+                        <i class="bi bi-bag-check me-1"></i>My Tray
+                        <h:panelGroup rendered="#{cartBean.totalItemCount > 0}">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                #{cartBean.totalItemCount}
+                            </span>
+                        </h:panelGroup>
+                    </h:link>
+
+                    <!-- User authentication status -->
+                    <h:panelGroup rendered="#{!authBean.loggedIn}">
+                        <h:link outcome="/login.xhtml" styleClass="btn btn-warning rounded-pill px-3 py-1 fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </h:link>
+                        <h:link outcome="/register.xhtml" styleClass="btn btn-outline-light rounded-pill px-3 py-1">
+                            Register
+                        </h:link>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{authBean.loggedIn}">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle rounded-pill px-3 py-1 bg-dark border-secondary" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1 text-warning"></i>
+                                #{authBean.currentUser.fullName}
+                                <span class="badge bg-primary ms-1">#{authBean.currentUser.role}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li>
+                                    <div class="dropdown-item-text text-muted small">
+                                        Signed in as <strong>#{authBean.currentUser.username}</strong>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <h:panelGroup rendered="#{authBean.student}">
+                                    <li>
+                                        <h:link outcome="/my-orders.xhtml" styleClass="dropdown-item">
+                                            <i class="bi bi-bag me-2"></i>My Orders
+                                        </h:link>
+                                    </li>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{authBean.vendor}">
+                                    <li>
+                                        <h:link outcome="/vendor/orders.xhtml" styleClass="dropdown-item">
+                                            <i class="bi bi-shop-window me-2"></i>Stall: #{authBean.currentVendor.stallName}
+                                        </h:link>
+                                    </li>
+                                </h:panelGroup>
+                                <li>
+                                    <h:form styleClass="d-inline">
+                                        <h:commandLink action="#{authBean.logout}" styleClass="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                        </h:commandLink>
+                                    </h:form>
+                                </li>
+                            </ul>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </div>
+    </nav>
+</ui:composition>
+</html>

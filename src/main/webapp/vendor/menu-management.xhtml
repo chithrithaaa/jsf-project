@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">Vendor Menu Management - Campus Canteen</ui:define>
+
+    <ui:define name="content">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-7">
+                <span class="badge bg-warning text-dark px-3 py-1 mb-2 fw-bold">
+                    <i class="bi bi-shop me-1"></i>#{vendorBean.vendor.stallName}
+                </span>
+                <h2 class="fw-bold text-dark mb-0">Menu &amp; Item Management</h2>
+                <p class="text-muted small">Add, update prices, or toggle availability of food items for your stall.</p>
+            </div>
+            <div class="col-md-5 text-md-end">
+                <h:link outcome="/vendor/orders.xhtml" styleClass="btn btn-outline-secondary">
+                    <i class="bi bi-receipt me-1"></i>View Kitchen Orders
+                </h:link>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Add / Edit Item Form -->
+            <div class="col-lg-4">
+                <div class="card canteen-card shadow-sm p-4 sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-pencil-square text-danger me-2"></i>
+                        #{vendorBean.editMode ? 'Edit Menu Item' : 'Add New Item'}
+                    </h5>
+
+                    <h:form id="menuItemForm">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Item Name *</label>
+                            <h:inputText value="#{vendorBean.itemForm.itemName}"
+                                         styleClass="form-control"
+                                         required="true"
+                                         requiredMessage="Item name is required."/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Category *</label>
+                            <h:selectOneMenu value="#{vendorBean.itemForm.category}" styleClass="form-select">
+                                <f:selectItem itemLabel="Breakfast" itemValue="Breakfast"/>
+                                <f:selectItem itemLabel="Main Course" itemValue="Main Course"/>
+                                <f:selectItem itemLabel="Snacks" itemValue="Snacks"/>
+                                <f:selectItem itemLabel="Beverages" itemValue="Beverages"/>
+                                <f:selectItem itemLabel="Dessert" itemValue="Dessert"/>
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Price (&#8377;) *</label>
+                                <h:inputText value="#{vendorBean.itemForm.price}"
+                                             styleClass="form-control"
+                                             required="true"
+                                             requiredMessage="Price is required."/>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Prep Time (mins)</label>
+                                <h:inputText value="#{vendorBean.itemForm.preparationTimeMins}"
+                                             styleClass="form-control"/>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Description</label>
+                            <h:inputTextarea value="#{vendorBean.itemForm.description}"
+                                             rows="2"
+                                             styleClass="form-control"
+                                             placeholder="Ingredients or description..."/>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <h:selectBooleanCheckbox value="#{vendorBean.itemForm.available}"
+                                                     id="availCheck"
+                                                     styleClass="form-check-input"/>
+                            <label class="form-check-label small fw-semibold" for="availCheck">Available in Stock</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <h:commandButton value="#{vendorBean.editMode ? 'Update Item' : 'Add to Menu'}"
+                                             action="#{vendorBean.saveMenuItem}"
+                                             styleClass="btn btn-canteen py-2 fw-bold">
+                                <f:ajax execute="@form" render=":menuItemForm :menuTableForm"/>
+                            </h:commandButton>
+
+                            <h:commandButton value="Cancel Edit"
+                                             action="#{vendorBean.prepareNewItem}"
+                                             rendered="#{vendorBean.editMode}"
+                                             styleClass="btn btn-light border py-2">
+                                <f:ajax render=":menuItemForm"/>
+                            </h:commandButton>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+
+            <!-- Existing Menu Items Table -->
+            <div class="col-lg-8">
+                <div class="card canteen-card shadow-sm">
+                    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-dark">Stall Food Items (#{vendorBean.menuList.size()})</span>
+                        <h:form styleClass="d-inline">
+                            <h:commandButton value="Refresh"
+                                             action="#{vendorBean.refreshMenu}"
+                                             styleClass="btn btn-sm btn-outline-secondary">
+                                <f:ajax render=":menuTableForm"/>
+                            </h:commandButton>
+                        </h:form>
+                    </div>
+
+                    <h:form id="menuTableForm">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Prep Time</th>
+                                        <th>Status</th>
+                                        <th class="text-center" style="width: 120px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ui:repeat value="#{vendorBean.menuList}" var="item">
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold text-dark">#{item.itemName}</div>
+                                                <small class="text-muted">#{item.description}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-secondary border">#{item.category}</span>
+                                            </td>
+                                            <td class="fw-bold text-success">&#8377; #{item.price}</td>
+                                            <td class="text-muted small">~#{item.preparationTimeMins} min</td>
+                                            <td>
+                                                <h:commandLink action="#{vendorBean.toggleAvailability(item)}"
+                                                               styleClass="badge text-decoration-none #{item.available ? 'bg-success' : 'bg-danger'}">
+                                                    #{item.available ? 'In Stock' : 'Sold Out'}
+                                                    <f:ajax render=":menuTableForm"/>
+                                                </h:commandLink>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm">
+                                                    <h:commandLink action="#{vendorBean.prepareEditItem(item)}"
+                                                                   styleClass="btn btn-outline-primary"
+                                                                   title="Edit Item">
+                                                        <i class="bi bi-pencil"></i>
+                                                        <f:ajax render=":menuItemForm"/>
+                                                    </h:commandLink>
+                                                    <h:commandLink action="#{vendorBean.deleteMenuItem(item)}"
+                                                                   onclick="return confirm('Delete this menu item?');"
+                                                                   styleClass="btn btn-outline-danger"
+                                                                   title="Delete Item">
+                                                        <i class="bi bi-trash"></i>
+                                                        <f:ajax render=":menuTableForm"/>
+                                                    </h:commandLink>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </ui:repeat>
+                                </tbody>
+                            </table>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

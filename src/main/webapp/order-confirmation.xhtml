@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">Order Confirmed - Campus Canteen</ui:define>
+
+    <ui:define name="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="card canteen-card shadow text-center p-4 p-md-5 mb-4">
+                    <div class="display-3 text-success mb-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark">Pre-Order Received!</h2>
+                    <p class="text-muted">Your order has been sent directly to the canteen kitchen counter.</p>
+
+                    <ui:repeat value="#{cartBean.lastPlacedOrders}" var="o">
+                        <div class="card bg-light border-0 rounded-3 p-3 my-3 text-start">
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                <div>
+                                    <span class="text-muted small">Token / Order #:</span>
+                                    <div class="fw-bold fs-5 text-danger">#{o.orderNumber}</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-warning text-dark px-3 py-2">#{o.status}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small">Pickup Counter:</span>
+                                    <div class="fw-bold text-dark">#{o.counterNumber} - #{o.vendorName}</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-muted small">Amount to Pay:</span>
+                                    <div class="fw-bold text-success fs-5">&#8377; #{o.totalAmount}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </ui:repeat>
+
+                    <div class="alert alert-info border-0 rounded-3 small text-start my-3">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        The vendor will change your order status from <strong>Placed &rarr; Preparing &rarr; Ready</strong>. Once ready, head over to the counter to collect your meal!
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <h:link outcome="/my-orders.xhtml" styleClass="btn btn-canteen px-4 py-2">
+                            <i class="bi bi-hourglass-split me-1"></i>Track My Orders
+                        </h:link>
+                        <h:link outcome="/menu.xhtml" styleClass="btn btn-outline-secondary px-4 py-2">
+                            Order More Items
+                        </h:link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">Canteen Menu - Multi-Vendor Food Ordering</ui:define>
+
+    <ui:define name="content">
+        <!-- Title & Filter Header -->
+        <div class="row align-items-center mb-4">
+            <div class="col-md-6">
+                <h2 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-grid-fill text-danger me-2"></i>Campus Canteen Menu
+                </h2>
+                <p class="text-muted small mb-0">Browse food items, filter by stall or category, and pre-order to skip queues.</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <h:link outcome="/cart.xhtml" styleClass="btn btn-canteen rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-bag-check-fill me-2"></i>View My Tray
+                    <h:panelGroup rendered="#{cartBean.totalItemCount > 0}">
+                        <span class="badge bg-light text-dark ms-2">#{cartBean.totalItemCount} items</span>
+                    </h:panelGroup>
+                </h:link>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="card bg-white border-0 shadow-sm p-3 mb-4 rounded-3">
+            <h:form id="filterForm">
+                <div class="row g-3 align-items-center">
+                    <!-- Stall Select -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Select Stall / Counter</label>
+                        <h:selectOneMenu value="#{menuBean.selectedVendorId}" styleClass="form-select">
+                            <f:selectItem itemLabel="-- All Canteen Stalls --" itemValue="#{null}"/>
+                            <f:selectItems value="#{menuBean.activeVendors}" var="v"
+                                           itemValue="#{v.id}"
+                                           itemLabel="#{v.stallName} (#{v.counterNumber})"/>
+                            <f:ajax event="change" listener="#{menuBean.filterMenu}" render=":menuListForm :filterForm"/>
+                        </h:selectOneMenu>
+                    </div>
+
+                    <!-- Category Select -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Category</label>
+                        <h:selectOneMenu value="#{menuBean.selectedCategory}" styleClass="form-select">
+                            <f:selectItem itemLabel="All Categories" itemValue="ALL"/>
+                            <f:selectItem itemLabel="Breakfast" itemValue="Breakfast"/>
+                            <f:selectItem itemLabel="Main Course" itemValue="Main Course"/>
+                            <f:selectItem itemLabel="Snacks" itemValue="Snacks"/>
+                            <f:selectItem itemLabel="Beverages" itemValue="Beverages"/>
+                            <f:selectItem itemLabel="Dessert" itemValue="Dessert"/>
+                            <f:ajax event="change" listener="#{menuBean.filterMenu}" render=":menuListForm :filterForm"/>
+                        </h:selectOneMenu>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Search Item</label>
+                        <div class="input-group">
+                            <h:inputText value="#{menuBean.searchKeyword}"
+                                         styleClass="form-control"
+                                         placeholder="e.g. Dosa, Burger, Chai..."/>
+                        </div>
+                    </div>
+
+                    <!-- Filter Actions -->
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <h:commandButton value="Filter"
+                                         action="#{menuBean.filterMenu}"
+                                         styleClass="btn btn-outline-canteen w-100"/>
+                        <h:commandButton value="Reset"
+                                         action="#{menuBean.resetFilter}"
+                                         styleClass="btn btn-light border w-100"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Menu Items Grid -->
+        <h:form id="menuListForm">
+            <h:panelGroup rendered="#{empty menuBean.menuItems}">
+                <div class="text-center py-5">
+                    <i class="bi bi-emoji-neutral text-muted display-4"></i>
+                    <h5 class="mt-3 text-secondary">No food items found matching your filter.</h5>
+                    <p class="text-muted small">Try selecting another counter or resetting filters.</p>
+                </div>
+            </h:panelGroup>
+
+            <div class="row g-4">
+                <ui:repeat value="#{menuBean.menuItems}" var="item">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card canteen-card h-100 d-flex flex-column">
+                            <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                                <span class="badge-stall">
+                                    <i class="bi bi-shop me-1"></i>#{item.stallCounter}
+                                </span>
+                                <span class="badge-category">#{item.category}</span>
+                            </div>
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold text-dark mb-1">#{item.itemName}</h5>
+                                <div class="small text-muted mb-2">
+                                    <i class="bi bi-geo-alt me-1"></i>#{item.vendorName}
+                                </div>
+                                <p class="card-text text-secondary small flex-grow-1">
+                                    #{item.description}
+                                </p>
+
+                                <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
+                                    <div>
+                                        <div class="item-price">&#8377; #{item.price}</div>
+                                        <small class="text-muted"><i class="bi bi-stopwatch me-1"></i>~#{item.preparationTimeMins} mins</small>
+                                    </div>
+
+                                    <div>
+                                        <h:commandButton value="+ Add to Tray"
+                                                         action="#{cartBean.addToCart(item)}"
+                                                         rendered="#{item.available}"
+                                                         styleClass="btn btn-canteen btn-sm px-3 shadow-sm"/>
+                                        <span class="badge bg-secondary py-2 px-3" rendered="#{!item.available}">
+                                            Sold Out
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ui:repeat>
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

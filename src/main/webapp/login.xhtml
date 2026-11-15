@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="title">Login - Campus Canteen</ui:define>
+
+    <ui:define name="content">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card canteen-card shadow-sm p-4 mt-2">
+                    <div class="text-center mb-4">
+                        <div class="display-6 text-danger mb-2">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark">Welcome Back</h3>
+                        <p class="text-muted small">Log in to pre-order food or manage your stall orders</p>
+                    </div>
+
+                    <h:form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                <h:inputText id="username"
+                                             value="#{authBean.loginUsername}"
+                                             styleClass="form-control"
+                                             required="true"
+                                             requiredMessage="Username is required."/>
+                            </div>
+                            <h:message for="username" styleClass="text-danger small"/>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                                <h:inputSecret id="password"
+                                               value="#{authBean.loginPassword}"
+                                               styleClass="form-control"
+                                               required="true"
+                                               requiredMessage="Password is required."/>
+                            </div>
+                            <h:message for="password" styleClass="text-danger small"/>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <h:commandButton value="Sign In"
+                                             action="#{authBean.login}"
+                                             styleClass="btn btn-canteen py-2 fw-bold"/>
+                        </div>
+                    </h:form>
+
+                    <div class="text-center pt-2 border-top mt-2">
+                        <span class="text-muted small">New student? </span>
+                        <h:link outcome="/register.xhtml" styleClass="fw-bold text-danger text-decoration-none">
+                            Register Here
+                        </h:link>
+                    </div>
+                </div>
+
+                <!-- Fast Demo Helper Card -->
+                <div class="card bg-white border rounded-3 p-3 mt-3 shadow-sm">
+                    <span class="fw-bold text-secondary small mb-2 d-block">
+                        <i class="bi bi-key-fill text-warning me-1"></i>Quick Test Accounts:
+                    </span>
+                    <ul class="list-unstyled mb-0 small text-muted">
+                        <li><strong>Student:</strong> <code>chithritha</code> / <code>student123</code></li>
+                        <li><strong>Vendor (Stall 1):</strong> <code>southspice</code> / <code>vendor123</code></li>
+                        <li><strong>Vendor (Stall 2):</strong> <code>campusbites</code> / <code>vendor123</code></li>
+                        <li><strong>Admin:</strong> <code>admin</code> / <code>admin123</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>
